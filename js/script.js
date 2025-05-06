@@ -5,21 +5,21 @@ class SentenceleGame {
   constructor() {
     // DOM要素
     this.DOM = {
-      spanTips: document.getElementById("span-tips"),
+      hintDisplay: document.getElementById("span-tips"),
       answerSection: document.getElementById("answer-section"),
-      spanDisplayAnswer: document.getElementById("span-display-answer"),
-      buttonResetGame: document.getElementById("button-reset-game"),
-      tableShowSentences: document.getElementById("table-show-sentences"),
-      inputEnterSentence: document.getElementById("input-enter-sentence"),
-      buttonDecideSentence: document.getElementById("button-decide-sentence"),
-      tbodyWordCandidates: document.getElementById("tbody-word-candidates")
+      answerDisplay: document.getElementById("span-display-answer"),
+      resetButton: document.getElementById("button-reset-game"),
+      sentencesTable: document.getElementById("table-show-sentences"),
+      sentenceInput: document.getElementById("input-enter-sentence"),
+      submitButton: document.getElementById("button-decide-sentence"),
+      wordCandidatesBody: document.getElementById("tbody-word-candidates")
     };
 
     // ゲーム設定
-    this.fieldHeight = 5;
-    this.sentenceCount = 0;
+    this.maxAttempts = 5;
+    this.currentAttempt = 0;
     this.isGameOver = false;
-    this.hintCharacters = [];
+    this.hintPrefixes = [];
     
     // 辞書と単語リスト
     this.initDictionaries();
@@ -213,22 +213,22 @@ class SentenceleGame {
   init() {
     this.clearBoard();
     this.answerSentence = this.generateAnswerSentence();
-    this.showTips();
-    this.makeField();
+    this.displayHints();
+    this.createGameField();
   }
 
   /**
    * ゲームボードをクリアして変数をリセットする
    */
   clearBoard() {
-    this.DOM.tableShowSentences.textContent = "";
-    this.hintCharacters = [];
-    this.DOM.spanTips.innerText = "";
+    this.DOM.sentencesTable.textContent = "";
+    this.hintPrefixes = [];
+    this.DOM.hintDisplay.innerText = "";
     this.DOM.answerSection.hidden = true;
-    this.DOM.spanDisplayAnswer.innerText = "";
-    this.DOM.tbodyWordCandidates.innerText = "";
-    this.DOM.inputEnterSentence.value = "";
-    this.sentenceCount = 0;
+    this.DOM.answerDisplay.innerText = "";
+    this.DOM.wordCandidatesBody.innerText = "";
+    this.DOM.sentenceInput.value = "";
+    this.currentAttempt = 0;
     this.isGameOver = false;
   }
 
@@ -246,8 +246,14 @@ class SentenceleGame {
       
       // 除外されていない場合はヒントに追加
       if (!this.wordNotIncludedInHint.includes(randomWord)) {
-        this.DOM.spanTips.innerText += (this.DOM.spanTips.innerText ? ", " : "") + randomWord.slice(0, 2);
-        this.hintCharacters.push(randomWord.slice(0, 2));
+        const prefix = randomWord.slice(0, 2);
+        this.hintPrefixes.push(prefix);
+        
+        if (this.DOM.hintDisplay.innerText) {
+          this.DOM.hintDisplay.innerText += ", " + prefix;
+        } else {
+          this.DOM.hintDisplay.innerText = prefix;
+        }
       }
     });
     
@@ -257,123 +263,137 @@ class SentenceleGame {
   /**
    * ヒントとして単語候補を表示する
    */
-  showTips() {
-    let candidates = [];
-    let tableCandidates = "";
+  displayHints() {
+    // 候補単語を収集
+    const candidates = new Set();
+    const wordCount = this.answerSentence.split(" ").length;
     
-    // ヒント文字に基づいて候補単語を見つける
-    this.hintCharacters.forEach(char => {
+    this.hintPrefixes.forEach(prefix => {
       Object.keys(this.wordsAndMeanings).forEach(word => {
-        if (!candidates.includes(word) &&
-            !this.wordNotIncludedInHint.includes(word) &&
-            word.startsWith(char)) {
-          candidates.push(word);
+        if (!this.wordNotIncludedInHint.includes(word) && word.startsWith(prefix)) {
+          candidates.add(word);
         }
       });
     });
     
-    // 候補テーブルのHTMLを生成
-    const wordCount = this.answerSentence.split(" ").length;
-    candidates.forEach((word, i) => {
-      if (!(i % wordCount)) {
-        tableCandidates += "<tr>";
+    // 候補単語をテーブルに表示
+    let tableHTML = "";
+    let cellCount = 0;
+    
+    candidates.forEach(word => {
+      if (cellCount % wordCount === 0) {
+        tableHTML += "<tr>";
       }
-      tableCandidates += `<td class="candidate-block">
-                            <span class="candidate">${word}</span>
-                            <span class="candidate-balloon">${this.wordsAndMeanings[word]}</span>
-                          </td>`;
-      if (!((i + 1) % wordCount)) {
-        tableCandidates += "</tr>";
+      
+      tableHTML += `<td class="candidate-block">
+                      <span class="candidate">${word}</span>
+                      <span class="candidate-balloon">${this.wordsAndMeanings[word]}</span>
+                    </td>`;
+      
+      cellCount++;
+      if (cellCount % wordCount === 0) {
+        tableHTML += "</tr>";
       }
     });
     
-    this.DOM.tbodyWordCandidates.innerHTML = tableCandidates;
+    // 最後の行が不完全な場合、残りのセルを追加
+    if (cellCount % wordCount !== 0) {
+      for (let i = cellCount % wordCount; i < wordCount; i++) {
+        tableHTML += "<td></td>";
+      }
+      tableHTML += "</tr>";
+    }
+    
+    this.DOM.wordCandidatesBody.innerHTML = tableHTML;
   }
 
   /**
    * ゲームフィールドを作成する
    */
-  makeField() {
+  createGameField() {
     const wordCount = this.answerSentence.split(" ").length;
-    let sentence = "<tbody>";
+    let tableHTML = "<tbody>";
     
-    for (let i = 0; i < this.fieldHeight; i++) {
-      sentence += '<tr class="sentence">';
+    for (let i = 0; i < this.maxAttempts; i++) {
+      tableHTML += '<tr class="sentence">';
       for (let j = 0; j < wordCount; j++) {
-        sentence += '<td class="word-block"><span class="word"></span></td>';
+        tableHTML += '<td class="word-block"><span class="word"></span></td>';
       }
-      sentence += "</tr>";
+      tableHTML += "</tr>";
     }
     
-    sentence += "</tbody>";
-    this.DOM.tableShowSentences.innerHTML += sentence;
+    tableHTML += "</tbody>";
+    this.DOM.sentencesTable.innerHTML = tableHTML;
   }
 
   /**
    * ユーザーが入力した文をチェックする
    */
   checkSentence() {
-    if (this.isGameOver || !this.DOM.inputEnterSentence.value) {
+    if (this.isGameOver || !this.DOM.sentenceInput.value) {
       return;
     }
     
-    const enteredWords = this.DOM.inputEnterSentence.value.split(" ");
+    const enteredWords = this.DOM.sentenceInput.value.trim().split(/\s+/);
     const answerWords = this.answerSentence.split(" ");
     
     // 単語数が一致するかチェック
-    if (enteredWords.includes("") || enteredWords.length !== answerWords.length) {
+    if (enteredWords.length !== answerWords.length) {
       alert("単語数が合いません");
       return;
     }
     
     // 入力された単語がすべて有効なトキポナの単語かチェック
-    for (const word of enteredWords) {
-      if (!Object.keys(this.wordsAndMeanings).includes(word)) {
-        alert("トキポナの単語を使用してください");
-        return;
-      }
+    const invalidWords = enteredWords.filter(word => !this.wordsAndMeanings[word]);
+    if (invalidWords.length > 0) {
+      alert("トキポナの単語を使用してください");
+      return;
     }
     
     // 入力された単語を処理してUIを更新
+    const rowOffset = this.currentAttempt * answerWords.length;
+    const wordElements = document.getElementsByClassName("word");
+    const wordBlockElements = document.getElementsByClassName("word-block");
+    
     enteredWords.forEach((word, i) => {
-      const spanWord = document.getElementsByClassName("word")[this.sentenceCount * answerWords.length + i];
-      const wordBlock = document.getElementsByClassName("word-block")[this.sentenceCount * answerWords.length + i];
+      const index = rowOffset + i;
+      const spanWord = wordElements[index];
+      const wordBlock = wordBlockElements[index];
       
-      if (word && spanWord) {
-        if (word === answerWords[i]) {
-          wordBlock.classList.add("word-correct-position");
-        } else if (answerWords.includes(word)) {
-          wordBlock.classList.add("word-include");
-        } else {
-          wordBlock.classList.add("word-not-include");
-        }
-        
-        spanWord.innerHTML = word;
-        wordBlock.innerHTML += `<span class="word-balloon">${this.wordsAndMeanings[word]}</span>`;
+      spanWord.innerText = word;
+      
+      if (word === answerWords[i]) {
+        wordBlock.classList.add("word-correct-position");
+      } else if (answerWords.includes(word)) {
+        wordBlock.classList.add("word-include");
+      } else {
+        wordBlock.classList.add("word-not-include");
       }
+      
+      wordBlock.innerHTML += `<span class="word-balloon">${this.wordsAndMeanings[word]}</span>`;
     });
     
     // 入力された単語に基づいて候補の色を更新
-    this.updateCandidateColors();
+    this.updateCandidateColors(enteredWords);
     
-    this.sentenceCount++;
+    this.currentAttempt++;
     
     // ゲームが終了したかチェック
-    if (this.DOM.inputEnterSentence.value === this.answerSentence) {
+    if (this.DOM.sentenceInput.value === this.answerSentence) {
       this.isGameOver = true;
       alert("正解");
       this.showAnswer();
-    } else if (this.sentenceCount >= this.fieldHeight) {
+    } else if (this.currentAttempt >= this.maxAttempts) {
       this.isGameOver = true;
       alert(`ゲームオーバー\n答えは${this.answerSentence}`);
       this.showAnswer();
     }
     
-    this.DOM.inputEnterSentence.value = "";
+    this.DOM.sentenceInput.value = "";
   }
 
   /**
-   * 候補単語の色を更新する
+   * 候補単語の色を更新する（最適化版
    */
   updateCandidateColors() {
     const wordElements = document.getElementsByClassName("word");
@@ -398,7 +418,7 @@ class SentenceleGame {
    */
   showAnswer() {
     this.DOM.answerSection.hidden = false;
-    this.DOM.spanDisplayAnswer.innerText = this.answerSentence;
+    this.DOM.answerDisplay.innerText = this.answerSentence;
   }
 
   /**
@@ -412,9 +432,9 @@ class SentenceleGame {
    * イベントハンドラをバインドする
    */
   bindEvents() {
-    this.DOM.buttonDecideSentence.addEventListener("click", () => this.checkSentence());
-    this.DOM.buttonResetGame.addEventListener("click", () => this.resetGame());
-    this.DOM.inputEnterSentence.addEventListener("keydown", (e) => {
+    this.DOM.submitButton.addEventListener("click", () => this.checkSentence());
+    this.DOM.resetButton.addEventListener("click", () => this.resetGame());
+    this.DOM.sentenceInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         this.checkSentence();
       }
