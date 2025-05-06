@@ -1,18 +1,54 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>TokiPona Sentencele</title>
-		<link rel="stylesheet" href="css/style.css">
-	</head>
-	<body>
-		<h1>TokiPona Sentencele</h1>
-		<input id="button-reset-game" type="button" value="ゲームをリセット">
-		<table id="table-show-sentences"></table>
-		<div class="input-row">
-		  <input id="input-enter-sentence" type="text" placeholder="例：toki pona li toki pona">
-		  <input id="button-decide-sentence" type="button" value="決定">
-		</div>
-		<script src="js/script.js"></script>
-	</body>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>TokiPona Sentencele</title>
+  <link rel="stylesheet" href="css/style.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <header>
+    <h1>TokiPona Sentencele</h1>
+    <button id="button-reset-game">ゲームをリセット</button>
+  </header>
+
+  <main>
+    <section aria-labelledby="hints-heading">
+      <h2 id="hints-heading" class="visually-hidden">ヒント</h2>
+      <p class="texts">ヒント「<span id="span-tips"></span>」</p>
+      <p class="small-gray-text" title="小辞…「li, pi, e, o」感動詞…「a, o, mu」">
+        ※「mi, sina, anu, en, 小辞, 感動詞」を除く
+      </p>
+      <p class="small-gray-text">※回答に「mi, sina, en, li, e」が含まれます</p>
+    </section>
+
+    <section id="answer-section" class="texts" hidden>
+      <p>正解は「<span id="span-display-answer"></span>」</p>
+    </section>
+
+    <section aria-labelledby="sentences-heading">
+      <h2 id="sentences-heading" class="visually-hidden">入力された文</h2>
+      <table id="table-show-sentences" aria-label="入力された文"></table>
+    </section>
+
+    <section class="input-row" aria-labelledby="input-heading">
+      <h2 id="input-heading" class="visually-hidden">文の入力</h2>
+      <input id="input-enter-sentence" type="text" placeholder="例：toki pona li toki pona">
+      <button id="button-decide-sentence">決定</button>
+    </section>
+
+    <section aria-labelledby="candidates-heading">
+      <h2 id="candidates-heading">候補</h2>
+      <table aria-label="単語の候補">
+        <tbody id="tbody-word-candidates"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <!-- フッターコンテンツがあればここに -->
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
 </html>
