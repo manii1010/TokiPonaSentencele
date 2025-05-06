@@ -1,7 +1,7 @@
 /**
  * TokiPonaWordle - トキポナ言語のためのWordleライクゲーム
  */
-class TokiPonaSentencele {
+class TokiPonaGame {
   constructor() {
     // DOM要素
     this.DOM = {
@@ -852,5 +852,5 @@ class TokiPonaSentencele {
 
 // DOMが完全にロードされたら、ゲームを初期化する
 document.addEventListener("DOMContentLoaded", () => {
-  const game = new TokiPonaSentencele();
+  const game = new TokiPonaGame();
 });
