@@ -1,3 +1,54 @@
+:root{
+	--main-color: #800000;
+}
+
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.5em;
+  }
+
+  .input-row {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .input-row input,
+  .input-row button {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 5px 0; /* 上下のみマージンを設定 */
+  }
+
+  input,
+  button {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  table {
+    font-size: 0.9em;
+    padding: 5px;
+    border-spacing: 4px;
+  }
+
+  td {
+    width: 60px;
+    height: 35px;
+    font-size: 0.85em;
+  }
+
+  .word-balloon,
+  .candidate-balloon {
+    font-size: 0.75em;
+    width: 150px;
+  }
+}
+
+
+
 body {
   display: flex;
   flex-direction: column;
@@ -13,7 +64,13 @@ body {
 h1 {
   font-size: 2em;
   margin-bottom: 20px;
-  color: #800000;
+  color: var(--main-color);
+}
+
+
+.small-gray-text {
+	color: #888;
+	font-size: 13px;
 }
 
 
@@ -24,6 +81,8 @@ table {
   background-color: #fff;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 
@@ -36,10 +95,44 @@ td {
   justify-content: center;
   align-items: center;
 	text-align: center;
+	position: relative;
 	vertical-align: middle;
 	margin-right: 5px;
 	margin-bottom: 5px;
 }
+
+/* tdをホバーしたときの処理 */
+td {
+  position: relative;
+}
+td:hover .word-balloon,
+td:hover .candidate-balloon {
+  display: inline;
+}
+.word-balloon,
+.candidate-balloon {
+	bottom: 110%;
+	border: 1px solid #000;
+	color: #000;
+  background-color: #fff;
+  font-size: 0.85em;
+  padding: 4px 6px;
+  position: absolute;
+  display: none;
+  width: 180px;
+  left: -1%;
+}
+.word-balloon:after,
+.candidate-balloon:after {
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  right: -12px;
+  top: 5%;
+  content: "";
+  position: absolute;
+}
+
+
 .word-correct-position {
 	border: none;
 	background-color: #008000;
@@ -57,30 +150,32 @@ td {
 }
 
 
-input {
-	border: 1px solid #800000;
+input,
+button {
+	border: 1px solid var(--main-color);
 	box-sizing: border-box;
 	outline: none;
 	padding: 5px;
 	font-weight: bold;
 	transition: all .2s;
 }
-input[type="text"],
-input[type="button"] {
+input,
+button {
   font-size: 1em;
   margin: 5px;
   border-radius: 5px;
 }
-input[type="button"] {
-	background-color: #800000;
+button {
+	background-color: var(--main-color);
 	color: #fff;
 	cursor: pointer;
 }
-input[type="button"]:hover {
+/* ボタンのホバー時の処理*/
+button:hover {
 	background-color: #fff;
-	color: #800000;
+	color: var(--main-color);
 }
-input[type="text"]:focus {
+input:focus {
 	border: 1px solid #000;
 }
 #button-reset-game {
@@ -88,9 +183,66 @@ input[type="text"]:focus {
 }
 .input-row {
   display: flex;
+  justify-content: center; /* 中央寄せ */
+  align-items: center;
+  gap: 10px; /* inputとボタンの間に余白 */
   margin-bottom: 20px;
 }
-.input-row input[type="text"] {
-  flex: 1;
-  min-width: 200px;
+
+/*
+.input-row input {
+  width: 300px;
+  max-width: 100%;
+}
+*/
+
+
+
+/* 視覚的に非表示にする（スクリーンリーダーには読まれる） */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* header の調整 */
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+/* main の幅を制限して中央に */
+main {
+  width: 100%;
+  max-width: 800px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  margin: 0 auto; /* ← これで中央寄せ */
+}
+
+/* section の余白と区切り */
+section {
+  margin-bottom: 30px;
+  text-align: center; /* テキストとインライン要素を中央に */
+}
+
+/* ヒント部分の文字サイズや余白微調整 */
+.texts {
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+/* 候補テーブルの見出しに余白 */
+section h2 {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+  color: var(--main-color);
 }
